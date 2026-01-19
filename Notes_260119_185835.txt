@@ -1,0 +1,3 @@
+MONGO_URI=mongodb://atlas-sql-696e6fa08d65a8914dc79ee3-pt8unk.a.query.mongodb.net/myVirtualDatabase?ssl=true&authSource=admin
+ADMIN_EMAIL=justarandomdude417@gmail.com
+ADMIN_PASSWORD=Da123456$$

@@ -1,0 +1,51 @@
+const express = require("express");
+const mongoose = require("mongoose");
+const cors = require("cors");
+require("dotenv").config();
+
+const app = express();
+app.use(cors());
+app.use(express.json());
+
+mongoose.connect(process.env.MONGO_URI)
+  .then(() => console.log("MongoDB Connected"))
+  .catch(err => console.log(err));
+
+const ShipmentSchema = new mongoose.Schema({
+  trackingNumber: String,
+  sender: String,
+  receiver: String,
+  status: { type: String, default: "In Transit" },
+  createdAt: { type: Date, default: Date.now }
+});
+
+const Shipment = mongoose.model("Shipment", ShipmentSchema);
+
+app.post("/admin/login", (req, res) => {
+  const { email, password } = req.body;
+  if (email === process.env.ADMIN_EMAIL && password === process.env.ADMIN_PASSWORD) {
+    res.json({ success: true });
+  } else {
+    res.status(401).json({ success: false });
+  }
+});
+
+app.post("/shipment", async (req, res) => {
+  const trackingNumber = "AP" + Math.floor(100000 + Math.random() * 900000);
+  const shipment = new Shipment({
+    trackingNumber,
+    sender: req.body.sender,
+    receiver: req.body.receiver
+  });
+  await shipment.save();
+  res.json(shipment);
+});
+
+app.get("/track/:trackingNumber", async (req, res) => {
+  const shipment = await Shipment.findOne({ trackingNumber: req.params.trackingNumber });
+  if (!shipment) return res.status(404).json({ message: "Shipment not found" });
+  res.json(shipment);
+});
+
+const PORT = process.env.PORT || 5000;
+app.listen(PORT, () => console.log(`Server running on port ${PORT}`));
